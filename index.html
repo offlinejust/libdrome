@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Libdrome — Game</title>
+  <style>
+    html,body{height:100%;margin:0}
+    canvas{display:block;width:100vw;height:100vh}
+  </style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <script>
+    // Настроить canvas под размер экрана с учётом DPR
+    (function(){
+      const canvas = document.getElementById('game');
+      const ctx = canvas.getContext('2d');
+      function resize(){
+        const dpr = window.devicePixelRatio || 1;
+        const w = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+        const h = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        if(ctx && ctx.setTransform) ctx.setTransform(dpr,0,0,dpr,0,0);
+      }
+      window.addEventListener('resize', resize, {passive:true});
+      window.addEventListener('orientationchange', resize, {passive:true});
+      document.addEventListener('DOMContentLoaded', resize);
+      // expose for modules
+      window.__GAME_CANVAS = canvas;
+      window.__GAME_CTX = ctx;
+    })();
+
+    // Загрузчик модулей: читает файл `liblist` (строки — относительные пути к .js)
+    async function loadLibsFromList(listPath = 'liblist'){
+      let text = null;
+      try{
+        const res = await fetch(listPath);
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        text = await res.text();
+      }catch(e){
+        // Пытаемся через XHR (иногда работает при file:// в старых браузерах)
+        try{
+          text = await new Promise((resolve,reject)=>{
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', listPath, true);
+            xhr.onload = ()=>{
+              if(xhr.status === 200 || xhr.status === 0) resolve(xhr.responseText);
+              else reject(new Error('XHR status ' + xhr.status));
+            };
+            xhr.onerror = ()=>reject(new Error('XHR error'));
+            xhr.send();
+          });
+        }catch(err){
+          console.error('Не удалось загрузить', listPath, e, err);
+          return;
+        }
+      }
+
+      const lines = text.split(/\r?\n/).map(s=>s.trim()).filter(s=>s && !s.startsWith('#'));
+      for(const p of lines){
+        try{
+          const s = document.createElement('script');
+          s.type = 'module';
+          s.src = p;
+          s.defer = true;
+          document.head.appendChild(s);
+        }catch(e){
+          console.error('Не удалось подключить', p, e);
+        }
+      }
+    }
+
+    // Запускаем загрузку после DOM готов
+    document.addEventListener('DOMContentLoaded', ()=>{
+      loadLibsFromList().catch(e=>console.error(e));
+    });
+  </script>
+</body>
+</html>

@@ -52,4 +52,6 @@ Changelog notes
 - 2026-06-22T00:00:00Z — первый генагент: базовое создание `index.html`, `lib/`, `liblist`, базовых модулей (`Sample.js`, `CubeSample.js`, `MapTiler.js`, `Game.js`, `MapGen.js`, `Camera.js`, `Entity*` и `EntitySpawner.js`).
 - 2026-06-22T00:00:00Z — второй генагент: создал `AI_CONTEXT/`, перенёс документацию в `AI_CONTEXT/README.md`, добавил `AI_CONTEXT/SUMMARY.md` и `AI_CONTEXT/CHANGELOG.md`, удалил `lib/README_lib.txt`.
 
+- 2026-06-22T12:00:00Z — второй генагент: добавлен игрок `EntitySlimePlayer`, изменения в `Camera.js` и `Game.js` для поддержки режима игрока и плавного центрирования камеры; см. `AI_CONTEXT/CHANGELOG.md` для подробностей.
+
 См. `AI_CONTEXT/CHANGELOG.md` для подробной летописи.
